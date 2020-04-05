@@ -1,0 +1,172 @@
+---
+title: "Milestone 6"
+author: "Liz Masten"
+date: "4/4/2020"
+output: bookdown::pdf_document2
+bibliography: article.bib
+biblio-style: apalike 
+link_citations: TRUE
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+knitr::write_bib(c("knitr", "stringr"), "bib2.bib", width = 60)
+
+library(foreign)
+library(tinytex)
+library(gt)
+library(bookdown)
+library(stargazer)
+library(bibtex)
+library(yaml)
+library(knitcitations)
+library(magick)
+library(memisc)
+library(pscl)
+library(tidyverse)
+```
+
+```{r}
+
+#Here is the cleaned data, available in GitHub repo. 
+
+data <- read.dta("fpy_replication_data_jop_2012.dta")
+
+# 1) A footnote with your repo url and some verbiage about “All analysis for this paper is available . . .”
+
+# 4) A 300 – 500 word overview of your replication paper. What analysis did they run? What did they conclude?
+
+```
+I am planning to replicate a paper by Michael Findley, James Piazza, and Joseph Young titled "Games Rivals Play: Terrorism in International Rivalries," appearing in The Journal of Politics, Vol. 74, No. 1, January 2012, Pp. 235-248. This paper analyzes transnational terrorism as a component of interstate rivalries, specifically focusing on the use of terrorism in proxy warfighting. 
+
+Their main argument is that interstate rivalries are a positive predictor of transnational terrorist activity. In other words, terrorist attacks are more likely to occur in the context of a rivalry between two states than in the absence of such a rivalry. They empirically test their hypothesis by analyzing “politically relevant directed state dyads,” meaning that they focus on country-level factors in states that sponsor terrorism as well as target states, while ignoring the states that are unlikely to interact at all in the international system. This use of politically relevant dyads allows the authors to incorporate covariates (rivalry, joint democracy, contiguity, and capability ratio) as controls, as well as practice good statistical practices by discounting irrelevant dyads that would increase the number of observations, thus increasing the likelihood of spurious statistical significance.^[@findley2012games] ^[All analysis for this paper is available in my GitHub: https://github.com/LizMas/ms_5]
+
+My thanks go to Professor Erica Chennoweth for suggesting this paper.
+
+
+```{r}
+
+# 2) A beautiful graphic which uses this data: 
+
+options(scipen = 999)
+
+graphic_1 <- data %>% 
+  group_by(year) %>% 
+  mutate(events = sum(terrorCounts))  
+
+plot <- ggplot(graphic_1, aes(x = year, y = events, group = rivalry, color = rivalry, fill= rivalry)) +
+  geom_col() +
+  labs(title = "Terrorism Events and Interstate Rivalry", 
+      subtitle = "Terrorist attacks occur more frequently in the presence of an interstate rivalry", 
+      caption = "Source: Games Rivals Play, Findley et al") +
+  xlab("Year") +
+  ylab("Number of Events") +
+  labs(fill = "Presence of Interstate Rivalry", color = "Presence of Interstate Rivalry") +
+    guides(fill = guide_legend(override.aes = list(color = NA)), 
+         color = FALSE, 
+         shape = FALSE)+
+          scale_fill_continuous(limits = c(0,1), breaks = c(0, 1), labels = c("Rivalry", "No Rivalry"))
+
+plot
+
+
+```
+
+
+```{r generated bibliography, echo=FALSE, eval=TRUE, message=FALSE, warning=FALSE}
+
+cleanbib()
+options("citation_format" = "pandoc")
+read.bibtex(file = "article.bib")
+
+#This is still a mess, but I can't for the life of me get the # off.
+ 
+```
+# Appendix
+
+```{r, results='asis'}
+
+#results = 'asis' to render stargazer table in pdf 
+
+#recreate Table 1, Models 1 - 4
+
+#Model 1: STATA: 'nbreg terrorCounts rivalry jointDem1 logcapratio contiguity, nolog cluster(dyadid) dispersion(constant)' 
+
+#The authors did a negative binomial regression in STATA, but I did a Poisson here because apparently a negtive binomial regression is just a type of Poisson, but Poisson is more generalized. 
+
+model_1 <- glm(data = data, terrorCounts ~ rivalry + jointDem1 + logcapratio + contiguity, family = poisson)
+
+# STATA: 'nbreg terrorCounts2 rivalry jointDem1 logcapratio contiguity, nolog cluster(dyadid)  dispersion(constant)'  
+
+model_2 <- glm(data = data, terrorCounts2 ~ rivalry + jointDem1 + logcapratio + contiguity, family = poisson)
+
+# STATA: 'nbreg terrorCounts rivalry jointDem1 logcapratio historyl1 historyl2 coldwar1 conflict1 conflict2 contiguity war1 war2, nolog cluster(dyadid) dispersion(constant)' 
+
+model_3 <- glm(data = data, terrorCounts ~ rivalry + jointDem1 + logcapratio + historyl1 + coldwar1 + conflict1 + conflict2 + contiguity + war1 + war2, family = poisson)
+
+#STATA: 'nbreg terrorCounts2 rivalry jointDem1 logcapratio historyl1 historyl2 coldwar1 conflict1 conflict2 contiguity war1 war2, nolog cluster(dyadid)  dispersion(constant)' 
+
+model_4 <- glm(data = data, terrorCounts2 ~ rivalry + jointDem1 + logcapratio + historyl1 + historyl2 + coldwar1 + conflict1 + conflict2 + contiguity + war1 + war2, family = poisson)
+
+stargazer::stargazer(model_1, model_2, model_3, model_4, 
+                    type= 'latex',
+                    title = "Reproduction Attempt at Poisson Models of Transnational Terrorist Activity per Findley et al")
+  
+```
+
+
+```{r}
+
+#this is Table 1 from the paper: 
+
+img <- magick::image_read('rep_table.png')
+print(img)
+
+```
+
+
+```{r, results='asis', cache = TRUE}
+
+#Table 2 replication,Zero-Inflated Negative Binomial Models of Transnational Terrorist Attacks Using Dyads
+
+# No clue what the R equivlent of STATA's "inflate" - apparently inflat determines whether the count is zero. 
+
+# STATA: zinb terrorCounts rivalry jointDem1 logcapratio historyl1 historyl2 coldwar1 conflict1 conflict2 contiguity war1 war2, inflate(rivalry jointDem1 logcapratio historyl1 historyl2 coldwar1 conflict1 conflict2 contiguity war1 war2) cluster(dyadid) nolog 
+
+model_5 <- zeroinfl(data = data, terrorCounts2 ~ rivalry + jointDem1 + logcapratio + historyl1 + historyl2 + coldwar1 + conflict1 + conflict2 + contiguity + war1 + war2)
+
+# STATA: zinb terrorCounts2 rivalry jointDem1 logcapratio historyl1 historyl2 coldwar1 conflict1 conflict2 contiguity war1 war2, inflate(rivalry jointDem1 logcapratio historyl1 historyl2 coldwar1 conflict1 conflict2 contiguity war1 war2) cluster(dyadid) nolog
+
+
+model_6 <- zeroinfl(data = data, terrorCounts2 ~ rivalry + jointDem1 + logcapratio + historyl1 + historyl2 + coldwar1 + conflict1 + conflict2 + contiguity + war1 + war2)
+
+# STATA: /* Note: convergence issues require a different maximization technique (bfgs) */
+# zinb terrorCounts rivalry jointDem1 logcapratio historyl1 historyl2 coldwar1 conflict1 conflict2 contiguity war1 war2, inflate(jointDem1) cluster(dyadid)  technique(bfgs) nolog
+
+model_7 <- zeroinfl.control(data = data, terrorCounts ~ rivalry + jointDem1 + logcapratio + historyl1 + historyl2 + coldwar1 + conflict1 + conflict2+ contiguity + war1 + war2, method = "BFGS")
+
+# STATA: zinb terrorCounts2 rivalry jointDem1 logcapratio  historyl1 historyl2 coldwar1 conflict1 conflict2 contiguity war1 war2, inflate(jointDem1) cluster(dyadid) nolog
+
+model_8 <- zeroinfl(data = data, terrorCounts2 ~ rivalry + jointDem1 + logcapratio + historyl1 + historyl2 + coldwar1 + conflict1 + conflict2 + contiguity + war1 + war2)
+
+
+stargazer(model_5, model_6, model_7, model_8,
+                    zero.component = FALSE,
+                    type= 'latex',
+                    title = "Reproduction Attempt at Zero Inflated Negative Binomial Models of Transnational Terrorist Activity per Findley et al")
+
+```
+
+```{r}
+
+#this is Table 2 from the paper: 
+
+img <- magick::image_read('rep_table_2.png')
+print(img)
+
+```
+
+
+# References 
