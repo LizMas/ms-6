@@ -39,11 +39,23 @@ data <- read.dta("fpy_replication_data_jop_2012.dta")
 # 4) A 300 – 500 word overview of your replication paper. What analysis did they run? What did they conclude?
 
 ```
-I am planning to replicate a paper by Michael Findley, James Piazza, and Joseph Young titled "Games Rivals Play: Terrorism in International Rivalries," appearing in The Journal of Politics, Vol. 74, No. 1, January 2012, Pp. 235-248. This paper analyzes transnational terrorism as a component of interstate rivalries, specifically focusing on the use of terrorism in proxy warfighting. 
+# Abstract 
 
-Their main argument is that interstate rivalries are a positive predictor of transnational terrorist activity. In other words, terrorist attacks are more likely to occur in the context of a rivalry between two states than in the absence of such a rivalry. They empirically test their hypothesis by analyzing “politically relevant directed state dyads,” meaning that they focus on country-level factors in states that sponsor terrorism as well as target states, while ignoring the states that are unlikely to interact at all in the international system. This use of politically relevant dyads allows the authors to incorporate covariates (rivalry, joint democracy, contiguity, and capability ratio) as controls, as well as practice good statistical practices by discounting irrelevant dyads that would increase the number of observations, thus increasing the likelihood of spurious statistical significance.^[@findley2012games] ^[All analysis for this paper is available in my GitHub: https://github.com/LizMas/ms_5]
+This is a replication and extension of "Games Rivals Play: Terrorism in International Rivalries" by Michael Findley, James Piazza, and Joseph Young. This paper analyzes transnational terrorism as a component of interstate rivalries, specifically focusing on the use of terrorism in proxy warfighting. They find that interstate rivalries are a positive predictor of transnational terrorist activity. I find that ... TBD ... 
 
-My thanks go to Professor Erica Chennoweth for suggesting this paper.
+# Introduction 
+
+Findley, Piazza, and Young analyze transnational terrorism as a component of interstate rivalries, specifically focusing on the use of terrorism in proxy warfighting. Their main argument is that terrorist attacks are more likely to occur in the context of a rivalry between two states than in the absence of such a rivalry. They empirically test their hypothesis by analyzing “politically relevant directed state dyads.” They define politically relevant as states where “relationships of interest are at least possible” and utilize directed state dyads to indicate directionality of attacks (i.e. the state where the attack originated) in which there exists at least one major power. 
+
+The authors include both contiguous states and noncontiguous states in their analysis, which departs from traditional international conflict analysis which prefers to limit observations to contiguous states as a metric for possible occurrence of conflict. This is important because terrorist attacks can be planned and executed in states that have a rivalry but no physical land, sea, or colonial border.  
+
+This use of politically relevant and directed dyads allows the authors to incorporate covariates (rivalry, joint democracy, contiguity, and capability ratio) as controls, as well as practice good statistical practices by discounting irrelevant dyads that would increase the number of observations, thus increasing the likelihood of spurious statistical significance.^[@findley2012games] ^[All analysis for this paper is available in my GitHub: https://github.com/LizMas/ms_5] 
+
+# Literature Review
+
+Forthcoming 
+
+# Graphic? 
 
 
 ```{r}
