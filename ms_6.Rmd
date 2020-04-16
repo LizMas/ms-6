@@ -26,6 +26,8 @@ library(magick)
 library(memisc)
 library(pscl)
 library(MASS)
+library(amen)
+library(clusterSEs)
 library(tidyverse)
 ```
 
@@ -33,7 +35,7 @@ library(tidyverse)
 
 #Here is the cleaned data, available in GitHub repo. 
 
-data <- read.dta("fpy_replication_data_jop_2012.dta")
+data <- read.dta("updated_data.dta")
 
 # 1) A footnote with your repo url and some verbiage about “All analysis for this paper is available . . .”
 
@@ -82,7 +84,7 @@ plot <- ggplot(graphic_1, aes(x = year, y = events, group = rivalry, color = riv
          shape = FALSE)+
           scale_fill_continuous(limits = c(0,1), breaks = c(0, 1), labels = c("Rivalry", "No Rivalry"))
 
-plot
+# plot
 
 
 ```
@@ -107,23 +109,24 @@ read.bibtex(file = "article.bib")
 
 #Model 1: STATA: 'nbreg terrorCounts rivalry jointDem1 logcapratio contiguity, nolog cluster(dyadid) dispersion(constant)' 
 
-#The authors did a negative binomial regression in STATA using nbreg. The R equivalent is glm.nb from the MASS package. Nolog supresses the display of the log, which I'll keep in the model, and dispersion(constant) is to show the variance, but R shows variance in other ways so I'll omit that. link = log is defaulted in STATA's nbreg but not R's glm.nb, so I've included it here. 
+#The authors did a negative binomial regression in STATA using nbreg. The R equivalent is glm.nb from the MASS package. However, glm.nb was not working with the historyl2 variable for some reason on model_4, and glm.nb sets dispersion at 1 by default with no way to specify it, from what I found. Quasipoisson allows for the dispersion to be unrestricted by the model and rather determined from the data itself. From what I can tell, this is as close to speficying dispersion(constant) from STATA as R gets.
 
-model_1 <- glm.nb(data = data, terrorCounts ~ rivalry + jointDem1 + logcapratio + contiguity, link = log) 
+model_1 <- glm(data = data, terrorCounts ~ rivalry + jointDem1 + logcapratio + contiguity, cluster(dyadid), family = quasipoisson)
+
+m12 <- glm.nb(data = data, terrorCounts ~ rivalry + jointDem1 + logcapratio + contiguity, cluster(dyadid))
 
 # STATA: 'nbreg terrorCounts2 rivalry jointDem1 logcapratio contiguity, nolog cluster(dyadid)  dispersion(constant)'  
 
-model_2 <- glm.nb(data = data, terrorCounts2 ~ rivalry + jointDem1 + logcapratio + contiguity, link = log) 
+model_2 <- glm(data = data, terrorCounts2 ~ rivalry + jointDem1 + logcapratio + contiguity, cluster(dyadid), family = quasipoisson) 
 
 # STATA: 'nbreg terrorCounts rivalry jointDem1 logcapratio historyl1 historyl2 coldwar1 conflict1 conflict2 contiguity war1 war2, nolog cluster(dyadid) dispersion(constant)' 
 
-model_3 <- glm.nb(data = data, terrorCounts ~ rivalry + jointDem1 + logcapratio + historyl1 + historyl2 + coldwar1 + conflict1 + conflict2 + contiguity + war1 + war2, link = log) 
+model_3 <- glm(data = data, terrorCounts ~ rivalry + jointDem1 + logcapratio + historyl1 + historyl2 + coldwar1 + conflict1 + conflict2 + contiguity + war1 + war2, cluster(dyadid), family = quasipoisson) 
 
 #STATA: 'nbreg terrorCounts2 rivalry jointDem1 logcapratio historyl1 historyl2 coldwar1 conflict1 conflict2 contiguity war1 war2, nolog cluster(dyadid)  dispersion(constant)' 
 
-# model_4 is broken on historyl2 for some reason... 
 
-# model_4 <- glm.nb(data = data, terrorCounts2 ~ rivalry + jointDem1 + logcapratio + historyl1 + historyl2 + coldwar1 + conflict1 + conflict2 + contiguity + war1 + war2) 
+model_4 <- glm(data = data, terrorCounts2 ~ rivalry + jointDem1 + logcapratio + historyl1 + historyl2 + coldwar1 + conflict1 + conflict2 + contiguity + war1 + war2, cluster(dyadid), family = quasipoisson) 
 
 stargazer::stargazer(model_1, model_2, model_3, 
                     type= 'latex',
