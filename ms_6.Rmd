@@ -113,8 +113,6 @@ read.bibtex(file = "article.bib")
 
 model_1 <- glm(data = data, terrorCounts ~ rivalry + jointDem1 + logcapratio + contiguity, cluster(dyadid), family = quasipoisson)
 
-m12 <- glm.nb(data = data, terrorCounts ~ rivalry + jointDem1 + logcapratio + contiguity, cluster(dyadid))
-
 # STATA: 'nbreg terrorCounts2 rivalry jointDem1 logcapratio contiguity, nolog cluster(dyadid)  dispersion(constant)'  
 
 model_2 <- glm(data = data, terrorCounts2 ~ rivalry + jointDem1 + logcapratio + contiguity, cluster(dyadid), family = quasipoisson) 
@@ -128,7 +126,7 @@ model_3 <- glm(data = data, terrorCounts ~ rivalry + jointDem1 + logcapratio + h
 
 model_4 <- glm(data = data, terrorCounts2 ~ rivalry + jointDem1 + logcapratio + historyl1 + historyl2 + coldwar1 + conflict1 + conflict2 + contiguity + war1 + war2, cluster(dyadid), family = quasipoisson) 
 
-stargazer::stargazer(model_1, model_2, model_3, 
+stargazer::stargazer(model_1, model_2, model_3, model_4,
                     type= 'latex',
                     title = "Reproduction Attempt at Poisson Models of Transnational Terrorist Activity per Findley et al")
   
@@ -138,10 +136,10 @@ stargazer::stargazer(model_1, model_2, model_3,
 
 ```{r}
 
-#this is Table 1 from the paper: 
+#this is Table 1 from the paper: does not currently exist here. 
 
-img <- magick::image_read('rep_table.png')
-print(img)
+# img <- magick::image_read('rep_table_errata.png')
+# print(img)
 
 ```
 
@@ -150,40 +148,39 @@ print(img)
 
 #Table 2 replication,Zero-Inflated Negative Binomial Models of Transnational Terrorist Attacks Using Dyads
 
-# No clue what the R equivlent of STATA's "inflate" - apparently inflat determines whether the count is zero. 
 
 # STATA: zinb terrorCounts rivalry jointDem1 logcapratio historyl1 historyl2 coldwar1 conflict1 conflict2 contiguity war1 war2, inflate(rivalry jointDem1 logcapratio historyl1 historyl2 coldwar1 conflict1 conflict2 contiguity war1 war2) cluster(dyadid) nolog 
 
-model_5 <- zeroinfl(data = data, terrorCounts ~ rivalry + jointDem1 + logcapratio + historyl1 + historyl2 + coldwar1 + conflict1 + conflict2 + contiguity + war1 + war2, dist = "negbin")
+# model_5 <- zeroinfl(data = data, terrorCounts ~ rivalry + jointDem1 + logcapratio + historyl1 + historyl2 + coldwar1 + conflict1 + conflict2 + contiguity + war1 + war2, cluster("dyadid"))
 
 # STATA: zinb terrorCounts2 rivalry jointDem1 logcapratio historyl1 historyl2 coldwar1 conflict1 conflict2 contiguity war1 war2, inflate(rivalry jointDem1 logcapratio historyl1 historyl2 coldwar1 conflict1 conflict2 contiguity war1 war2) cluster(dyadid) nolog
 
 
-model_6 <- zeroinfl(data = data, terrorCounts2 ~ rivalry + jointDem1 + logcapratio + historyl1 + historyl2 + coldwar1 + conflict1 + conflict2 + contiguity + war1 + war2, dist = "negbin")
+# model_6 <- zeroinfl(data = data, terrorCounts2 ~ rivalry + jointDem1 + logcapratio + historyl1 + historyl2 + coldwar1 + conflict1 + conflict2 + contiguity + war1 + war2, dist = "negbin")
 
 # STATA: /* Note: convergence issues require a different maximization technique (bfgs) */
 # zinb terrorCounts rivalry jointDem1 logcapratio historyl1 historyl2 coldwar1 conflict1 conflict2 contiguity war1 war2, inflate(jointDem1) cluster(dyadid)  technique(bfgs) nolog
 
-model_7 <- zeroinfl.control(data = data, terrorCounts ~ rivalry + jointDem1 + logcapratio + historyl1 + historyl2 + coldwar1 + conflict1 + conflict2+ contiguity + war1 + war2, method = "BFGS")
+# model_7 <- zeroinfl.control(data = data, terrorCounts ~ rivalry + jointDem1 + logcapratio + historyl1 + historyl2 + coldwar1 + conflict1 + conflict2+ contiguity + war1 + war2, method = "BFGS")
 
 # STATA: zinb terrorCounts2 rivalry jointDem1 logcapratio  historyl1 historyl2 coldwar1 conflict1 conflict2 contiguity war1 war2, inflate(jointDem1) cluster(dyadid) nolog
 
-model_8 <- zeroinfl(data = data, terrorCounts2 ~ rivalry + jointDem1 + logcapratio + historyl1 + historyl2 + coldwar1 + conflict1 + conflict2 + contiguity + war1 + war2)
+# model_8 <- zeroinfl(data = data, terrorCounts2 ~ rivalry + jointDem1 + logcapratio + historyl1 + historyl2 + coldwar1 + conflict1 + conflict2 + contiguity + war1 + war2)
 
 
-stargazer(model_5, model_6, model_7, model_8,
-                    zero.component = FALSE,
-                    type= 'latex',
-                    title = "Reproduction Attempt at Zero Inflated Negative Binomial Models of Transnational Terrorist Activity per Findley et al")
+# stargazer(model_5, model_6, model_7, model_8,
+  #                  zero.component = FALSE,
+   #                 type= 'latex',
+    #                title = "Reproduction Attempt at Zero Inflated Negative Binomial Models of Transnational Terrorist Activity per Findley et al")
 
 ```
 
 ```{r}
 
-#this is Table 2 from the paper: 
+#this is Table 2 from the paper: old, don't use
 
-img <- magick::image_read('rep_table_2.png')
-print(img)
+#img <- magick::image_read('rep_table_2.png')
+#print(img)
 
 ```
 
