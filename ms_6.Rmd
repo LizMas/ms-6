@@ -1,5 +1,5 @@
 ---
-title: "Milestone 6"
+title: "Milestone 7" 
 author: "Liz Masten"
 date: "4/4/2020"
 output: bookdown::pdf_document2
@@ -25,6 +25,7 @@ library(knitcitations)
 library(magick)
 library(memisc)
 library(pscl)
+library(MASS)
 library(tidyverse)
 ```
 
@@ -60,7 +61,7 @@ Forthcoming
 
 ```{r}
 
-# 2) A beautiful graphic which uses this data: 
+# 2) A beautiful graphic which uses this data: dont use
 
 options(scipen = 999)
 
@@ -106,26 +107,29 @@ read.bibtex(file = "article.bib")
 
 #Model 1: STATA: 'nbreg terrorCounts rivalry jointDem1 logcapratio contiguity, nolog cluster(dyadid) dispersion(constant)' 
 
-#The authors did a negative binomial regression in STATA, but I did a Poisson here because apparently a negtive binomial regression is just a type of Poisson, but Poisson is more generalized. 
+#The authors did a negative binomial regression in STATA using nbreg. The R equivalent is glm.nb from the MASS package. Nolog supresses the display of the log, which I'll keep in the model, and dispersion(constant) is to show the variance, but R shows variance in other ways so I'll omit that. link = log is defaulted in STATA's nbreg but not R's glm.nb, so I've included it here. 
 
-model_1 <- glm(data = data, terrorCounts ~ rivalry + jointDem1 + logcapratio + contiguity, family = poisson)
+model_1 <- glm.nb(data = data, terrorCounts ~ rivalry + jointDem1 + logcapratio + contiguity, link = log) 
 
 # STATA: 'nbreg terrorCounts2 rivalry jointDem1 logcapratio contiguity, nolog cluster(dyadid)  dispersion(constant)'  
 
-model_2 <- glm(data = data, terrorCounts2 ~ rivalry + jointDem1 + logcapratio + contiguity, family = poisson)
+model_2 <- glm.nb(data = data, terrorCounts2 ~ rivalry + jointDem1 + logcapratio + contiguity, link = log) 
 
 # STATA: 'nbreg terrorCounts rivalry jointDem1 logcapratio historyl1 historyl2 coldwar1 conflict1 conflict2 contiguity war1 war2, nolog cluster(dyadid) dispersion(constant)' 
 
-model_3 <- glm(data = data, terrorCounts ~ rivalry + jointDem1 + logcapratio + historyl1 + coldwar1 + conflict1 + conflict2 + contiguity + war1 + war2, family = poisson)
+model_3 <- glm.nb(data = data, terrorCounts ~ rivalry + jointDem1 + logcapratio + historyl1 + historyl2 + coldwar1 + conflict1 + conflict2 + contiguity + war1 + war2, link = log) 
 
 #STATA: 'nbreg terrorCounts2 rivalry jointDem1 logcapratio historyl1 historyl2 coldwar1 conflict1 conflict2 contiguity war1 war2, nolog cluster(dyadid)  dispersion(constant)' 
 
-model_4 <- glm(data = data, terrorCounts2 ~ rivalry + jointDem1 + logcapratio + historyl1 + historyl2 + coldwar1 + conflict1 + conflict2 + contiguity + war1 + war2, family = poisson)
+# model_4 is broken on historyl2 for some reason... 
 
-stargazer::stargazer(model_1, model_2, model_3, model_4, 
+# model_4 <- glm.nb(data = data, terrorCounts2 ~ rivalry + jointDem1 + logcapratio + historyl1 + historyl2 + coldwar1 + conflict1 + conflict2 + contiguity + war1 + war2) 
+
+stargazer::stargazer(model_1, model_2, model_3, 
                     type= 'latex',
                     title = "Reproduction Attempt at Poisson Models of Transnational Terrorist Activity per Findley et al")
   
+
 ```
 
 
@@ -147,12 +151,12 @@ print(img)
 
 # STATA: zinb terrorCounts rivalry jointDem1 logcapratio historyl1 historyl2 coldwar1 conflict1 conflict2 contiguity war1 war2, inflate(rivalry jointDem1 logcapratio historyl1 historyl2 coldwar1 conflict1 conflict2 contiguity war1 war2) cluster(dyadid) nolog 
 
-model_5 <- zeroinfl(data = data, terrorCounts2 ~ rivalry + jointDem1 + logcapratio + historyl1 + historyl2 + coldwar1 + conflict1 + conflict2 + contiguity + war1 + war2)
+model_5 <- zeroinfl(data = data, terrorCounts ~ rivalry + jointDem1 + logcapratio + historyl1 + historyl2 + coldwar1 + conflict1 + conflict2 + contiguity + war1 + war2, dist = "negbin")
 
 # STATA: zinb terrorCounts2 rivalry jointDem1 logcapratio historyl1 historyl2 coldwar1 conflict1 conflict2 contiguity war1 war2, inflate(rivalry jointDem1 logcapratio historyl1 historyl2 coldwar1 conflict1 conflict2 contiguity war1 war2) cluster(dyadid) nolog
 
 
-model_6 <- zeroinfl(data = data, terrorCounts2 ~ rivalry + jointDem1 + logcapratio + historyl1 + historyl2 + coldwar1 + conflict1 + conflict2 + contiguity + war1 + war2)
+model_6 <- zeroinfl(data = data, terrorCounts2 ~ rivalry + jointDem1 + logcapratio + historyl1 + historyl2 + coldwar1 + conflict1 + conflict2 + contiguity + war1 + war2, dist = "negbin")
 
 # STATA: /* Note: convergence issues require a different maximization technique (bfgs) */
 # zinb terrorCounts rivalry jointDem1 logcapratio historyl1 historyl2 coldwar1 conflict1 conflict2 contiguity war1 war2, inflate(jointDem1) cluster(dyadid)  technique(bfgs) nolog
@@ -180,5 +184,15 @@ print(img)
 
 ```
 
+```{r}
+
+# extension 
+
+sum(is.na(data$jointDem1))
+
+data %>% nrow()
+
+# there are 15026 NA values in jointDem1. The rest of the variables are ok. Since there are 80564 observations total, the missing jointDem1 account for almost 19% of the total observations. This is larger than I would like, and is especially weird considering that the rest of the variables are remarkably present. 
+```
 
 # References 
