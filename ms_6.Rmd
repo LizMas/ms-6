@@ -3,7 +3,7 @@ title: "Milestone 7"
 author: "Liz Masten"
 date: "4/4/2020"
 output: bookdown::pdf_document2
-bibliography: article.bib
+bibliography: bib2.bib
 biblio-style: apalike 
 link_citations: TRUE
 ---
@@ -11,8 +11,6 @@ link_citations: TRUE
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
-
-knitr::write_bib(c("knitr", "stringr"), "bib2.bib", width = 60)
 
 library(foreign)
 library(tinytex)
@@ -28,8 +26,19 @@ library(pscl)
 library(MASS)
 library(amen)
 library(clusterSEs)
+library(RStata)
 library(tidyverse)
 ```
+
+```{r}
+
+#set up link to STATA 
+
+#options("RStata.StataPath" = "\"C:\\Users\\elizm\\Downloads\\Stata16_64bit\"")
+#options("RStata.StataVersion" = 16.1)
+
+```
+
 
 ```{r}
 
@@ -42,23 +51,27 @@ data <- read.dta("updated_data.dta")
 # 4) A 300 – 500 word overview of your replication paper. What analysis did they run? What did they conclude?
 
 ```
+
+
 # Abstract 
 
-This is a replication and extension of "Games Rivals Play: Terrorism in International Rivalries" by Michael Findley, James Piazza, and Joseph Young. This paper analyzes transnational terrorism as a component of interstate rivalries, specifically focusing on the use of terrorism in proxy warfighting. They find that interstate rivalries are a positive predictor of transnational terrorist activity. I find that ... TBD ... 
+Michael Findley, James Piazza, and Joseph Young show, in their paper "Games Rivals Play: Terrorism in International Rivalries," that interstate rivalries are a positive predictor of transnational terrorist activity. The authors argue that terrorism is often a component of broader hostilities that can be emperically analyzed using a series of politicaly relevant directed dyads. While this paper is a successful replication of their work, my subsequent extension calls into question their choice to use dyadic analysis. When using country-year analysis as opposed to directed dyad analysis, I find that ... idk yet... Why care? something something calls into question the trend of using dyadic analysis for all international conflict research... or something. 
 
 # Introduction 
 
 Findley, Piazza, and Young analyze transnational terrorism as a component of interstate rivalries, specifically focusing on the use of terrorism in proxy warfighting. Their main argument is that terrorist attacks are more likely to occur in the context of a rivalry between two states than in the absence of such a rivalry. They empirically test their hypothesis by analyzing “politically relevant directed state dyads.” They define politically relevant as states where “relationships of interest are at least possible” and utilize directed state dyads to indicate directionality of attacks (i.e. the state where the attack originated) in which there exists at least one major power. 
 
-The authors include both contiguous states and noncontiguous states in their analysis, which departs from traditional international conflict analysis which prefers to limit observations to contiguous states as a metric for possible occurrence of conflict. This is important because terrorist attacks can be planned and executed in states that have a rivalry but no physical land, sea, or colonial border.  
+I was able to successfully replicate the authors' findings in this paper exactly. Note that the authors suffered from a data management error at the time of publication and subsequently published errata results.(cite where I got data here). I based my analysis on the revised data and tables, which can be found in the Appendix. Because there are no directly analagous R packages to translate the authors' original STATA code, I wrote and managed the project in R while running the replication and extension in STATA.(cite R and STATA here).^[All analysis for this paper is available in my GitHub: https://github.com/LizMas/ms_5] (change location of link). 
 
-This use of politically relevant and directed dyads allows the authors to incorporate covariates (rivalry, joint democracy, contiguity, and capability ratio) as controls, as well as practice good statistical practices by discounting irrelevant dyads that would increase the number of observations, thus increasing the likelihood of spurious statistical significance.^[@findley2012games] ^[All analysis for this paper is available in my GitHub: https://github.com/LizMas/ms_5] 
+what did i do and find? roadmap to rest of paper. 
 
 # Literature Review
 
-Forthcoming 
+The authors include both contiguous states and noncontiguous states in their analysis, which departs slightly from traditional international conflict analysis which prefers to limit observations to contiguous states as a metric for possible occurrence of conflict. This is important because terrorist attacks can be planned and executed in states that have a rivalry but no physical land, sea, or colonial border.  
 
-# Graphic? 
+This use of politically relevant and directed dyads allows the authors to incorporate covariates (rivalry, joint democracy, contiguity, and capability ratio) as controls, as well as practice good statistical practices by discounting irrelevant dyads that would increase the number of observations, thus increasing the likelihood of spurious statistical significance. 
+
+
 
 
 ```{r}
@@ -112,6 +125,7 @@ read.bibtex(file = "article.bib")
 #The authors did a negative binomial regression in STATA using nbreg. The R equivalent is glm.nb from the MASS package. However, glm.nb was not working with the historyl2 variable for some reason on model_4, and glm.nb sets dispersion at 1 by default with no way to specify it, from what I found. Quasipoisson allows for the dispersion to be unrestricted by the model and rather determined from the data itself. From what I can tell, this is as close to speficying dispersion(constant) from STATA as R gets.
 
 model_1 <- glm(data = data, terrorCounts ~ rivalry + jointDem1 + logcapratio + contiguity, cluster(dyadid), family = quasipoisson)
+
 
 # STATA: 'nbreg terrorCounts2 rivalry jointDem1 logcapratio contiguity, nolog cluster(dyadid)  dispersion(constant)'  
 
@@ -188,11 +202,9 @@ stargazer::stargazer(model_1, model_2, model_3, model_4,
 
 # extension 
 
-sum(is.na(data$jointDem1))
+# get rid of the dyads and run the first 4 models: 
 
-data %>% nrow()
 
-# there are 15026 NA values in jointDem1. The rest of the variables are ok. Since there are 80564 observations total, the missing jointDem1 account for almost 19% of the total observations. This is larger than I would like, and is especially weird considering that the rest of the variables are remarkably present. 
 ```
 
 # References 
